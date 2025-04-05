@@ -1,16 +1,17 @@
 export default async function handler(req, res) {
-    res.setHeader("Access-Control-Allow-Origin", "*"); // ✅ Allow all origins
+    // ✅ CORS headers
+    res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET,OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
     if (req.method === "OPTIONS") {
-        // Handle CORS preflight
+        // ✅ Respond to preflight request
         res.status(200).end();
         return;
     }
 
     try {
-        const url = req.query.url;
+        const { url } = req.query;
         if (!url) return res.status(400).send("❌ Missing URL");
 
         const response = await fetch(url, {
