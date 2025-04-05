@@ -1,31 +1,26 @@
-export default async function handler(req, res) {
-    // ✅ CORS headers
-    res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
-    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+import express from "express";
+import cors from "cors";
 
-    if (req.method === "OPTIONS") {
-        // ✅ CORS preflight support
-        return res.status(200).end();
-    }
+const app = express();
+app.use(cors());
 
-    const url = req.query.url;
-
-    if (!url) {
-        return res.status(400).send("❌ Missing URL");
-    }
-
+app.get("/fetch", async (req, res) => {
     try {
-        const response = await fetch(url, {
-            headers: {
-                "User-Agent": "Mozilla/5.0"
-            }
+        let url = req.query.url;
+        if (!url) return res.status(400).send("❌ Missing URL");
+
+        let response = await fetch(url, {
+            headers: { "User-Agent": "Mozilla/5.0" },
         });
 
-        const html = await response.text();
-        res.status(200).send(html);
+        if (!response.ok) throw new Error(`❌ HTTP Error: ${response.status}`);
+
+        let data = await response.text();
+        res.send(data);
     } catch (error) {
-        console.error("🔥 Server error:", error.message);
-        res.status(500).send("❌ Failed to fetch content");
+        console.error("🔥 Error:", error.message);
+        res.status(500).send("❌ Server Error: " + error.message);
     }
-}
+});
+
+app.listen(3000, () => console.log("🚀 Proxy running on port 3000"));
